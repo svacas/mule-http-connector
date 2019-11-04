@@ -45,6 +45,7 @@ public class HttpRequestAttributesBuilder {
   private Supplier<Certificate> clientCertificate = () -> null;
 
   private boolean resolveMaskedRequestPath = false;
+  private Map<String, String> maskedPathCache;
 
   public HttpRequestAttributesBuilder() {}
 
@@ -182,6 +183,7 @@ public class HttpRequestAttributesBuilder {
     requireNonNull(requestUri, "Request URI cannot be null.");
     requireNonNull(localAddress, "Local address cannot be null.");
     requireNonNull(remoteAddress, "Remote address cannot be null.");
+
     if (resolveMaskedRequestPath) {
       maskedRequestPath = maskRequestPath();
     }
@@ -192,7 +194,20 @@ public class HttpRequestAttributesBuilder {
   }
 
   private String maskRequestPath() {
-    //Avoid resolution if not a valid listenerPath mask
+    if (maskedPathCache == null) {
+      return doMaskRequestPath();
+    }
+
+    String maskedPath = maskedPathCache.get(rawRequestPath);
+    if (maskedPath == null) {
+      maskedPath = doMaskRequestPath();
+      maskedPathCache.put(rawRequestPath, maskedPath);
+    }
+    return maskedPath;
+  }
+
+  private String doMaskRequestPath() {
+    // Avoid resolution if not a valid listenerPath mask
     if (!listenerPath.endsWith(WILDCARD)) {
       return null;
     }
@@ -203,12 +218,12 @@ public class HttpRequestAttributesBuilder {
     try {
       while (listenerPathCurrentSlashIndex < listenerPath.length() - 1) {
         listenerPathCurrentSlashIndex = iterateUntilNextSlash(listenerPath, listenerPathCurrentSlashIndex);
-        //Using the raw path means the masking will be done against the actual client data (a must for proxies)
+        // Using the raw path means the masking will be done against the actual client data (a must for proxies)
         requestPathCurrentSlashIndex = iterateUntilNextSlash(rawRequestPath, requestPathCurrentSlashIndex);
       }
     } catch (StringIndexOutOfBoundsException e) {
-      //If here it means that the number of slashes in the requestPath is not the same as in the listenerPath.
-      //That can only happen if the requestPath is equal to the listenerPath without considering the *.
+      // If here it means that the number of slashes in the requestPath is not the same as in the listenerPath.
+      // That can only happen if the requestPath is equal to the listenerPath without considering the *.
       return valueOf(SLASH);
     }
 
@@ -223,4 +238,8 @@ public class HttpRequestAttributesBuilder {
     return position;
   }
 
+  public HttpRequestAttributesBuilder maskedPathCache(Map<String, String> maskedPathCache) {
+    this.maskedPathCache = maskedPathCache;
+    return this;
+  }
 }

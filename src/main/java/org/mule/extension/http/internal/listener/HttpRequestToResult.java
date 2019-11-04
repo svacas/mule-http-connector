@@ -11,7 +11,6 @@ import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static org.mule.runtime.core.api.config.MuleProperties.SYSTEM_PROPERTY_PREFIX;
 import static org.mule.runtime.http.api.HttpHeaders.Names.CONTENT_TYPE;
-
 import org.mule.extension.http.api.HttpRequestAttributes;
 import org.mule.runtime.api.metadata.MediaType;
 import org.mule.runtime.extension.api.runtime.operation.Result;
@@ -19,11 +18,13 @@ import org.mule.runtime.http.api.domain.entity.HttpEntity;
 import org.mule.runtime.http.api.domain.message.request.HttpRequest;
 import org.mule.runtime.http.api.domain.request.HttpRequestContext;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Component that transforms an HTTP request to a proper {@link Result}.
@@ -33,6 +34,8 @@ import java.nio.charset.Charset;
 public class HttpRequestToResult {
 
   private static final Logger logger = LoggerFactory.getLogger(HttpRequestToResult.class);
+
+  private static Map<String, String> maskedPathCache = new HashMap<>();
 
   public static Result<InputStream, HttpRequestAttributes> transform(final HttpRequestContext requestContext,
                                                                      final Charset encoding,
@@ -45,7 +48,11 @@ public class HttpRequestToResult {
     InputStream payload = entity.getContent();
 
     HttpRequestAttributes attributes =
-        new HttpRequestAttributesResolver().setRequestContext(requestContext).setListenerPath(listenerPath).resolve();
+        new HttpRequestAttributesResolver()
+            .setRequestContext(requestContext)
+            .setListenerPath(listenerPath)
+            .setMaskedPathCache(maskedPathCache)
+            .resolve();
 
     Result.Builder<InputStream, HttpRequestAttributes> resultBuilder = Result.builder();
     if (entity.getLength().isPresent()) {

@@ -8,7 +8,6 @@ package org.mule.extension.http.internal.listener;
 
 import static org.mule.runtime.http.api.utils.HttpEncoderDecoderUtils.decodeQueryString;
 import static org.mule.runtime.http.api.utils.HttpEncoderDecoderUtils.decodeUriParams;
-
 import org.mule.extension.http.api.HttpRequestAttributes;
 import org.mule.extension.http.api.HttpRequestAttributesBuilder;
 import org.mule.runtime.http.api.domain.message.request.HttpRequest;
@@ -16,6 +15,7 @@ import org.mule.runtime.http.api.domain.request.ClientConnection;
 import org.mule.runtime.http.api.domain.request.HttpRequestContext;
 
 import java.net.URI;
+import java.util.Map;
 
 /**
  * Creates {@link HttpRequestAttributes} based on an {@link HttpRequestContext}, it's parts and a {@link ListenerPath}.
@@ -26,6 +26,7 @@ public class HttpRequestAttributesResolver {
 
   private HttpRequestContext requestContext;
   private ListenerPath listenerPath;
+  private Map<String, String> maskedPathCache;
 
   public HttpRequestAttributesResolver setRequestContext(HttpRequestContext requestContext) {
     this.requestContext = requestContext;
@@ -34,6 +35,11 @@ public class HttpRequestAttributesResolver {
 
   public HttpRequestAttributesResolver setListenerPath(ListenerPath listenerPath) {
     this.listenerPath = listenerPath;
+    return this;
+  }
+
+  public HttpRequestAttributesResolver setMaskedPathCache(Map<String, String> maskedPathCache) {
+    this.maskedPathCache = maskedPathCache;
     return this;
   }
 
@@ -77,6 +83,8 @@ public class HttpRequestAttributesResolver {
         .localAddress(requestContext.getServerConnection().getLocalHostAddress().toString())
         .remoteAddress(clientConnection.getRemoteHostAddress().toString())
         .clientCertificate(clientConnection::getClientCertificate)
+        .maskedPathCache(maskedPathCache)
         .build();
   }
+
 }
