@@ -1,3 +1,5 @@
-Map pipelineParams = [ : ]
+Map pipelineParams = [
+    devBranchesRegex: ".*"
+]
 
 runtimeExtensionsBuild(pipelineParams)
