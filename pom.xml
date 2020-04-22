@@ -15,7 +15,7 @@
     <groupId>org.mule.connectors</groupId>
     <artifactId>mule-http-connector</artifactId>
     <packaging>mule-extension</packaging>
-    <version>1.4.2-HDP-SNAPSHOT</version>
+    <version>1.4.2-HDP</version>
 
     <name>HTTP Connector</name>
     <description>A Mule extension that provides HTTP server and client functionality</description>
@@ -244,12 +244,12 @@
 
     <distributionManagement>
         <repository>
-            <id>mule-releases</id>
+            <id>mulesoft-releases</id>
             <name>Mule Release Repository</name>
             <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases</url>
         </repository>
         <snapshotRepository>
-            <id>mule-snapshots</id>
+            <id>mulesoft-snapshots</id>
             <name>Mule Snapshot Repository</name>
             <url>https://repository-master.mulesoft.org/nexus/content/repositories/snapshots</url>
             <uniqueVersion>false</uniqueVersion>
